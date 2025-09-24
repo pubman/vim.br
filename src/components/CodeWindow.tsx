@@ -2,12 +2,31 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { vim, Vim, getCM } from '@replit/codemirror-vim';
 import { EditorView } from '@codemirror/view';
+import { EditorState } from '@codemirror/state';
+import { Decoration, DecorationSet } from '@codemirror/view';
 import { javascript } from '@codemirror/lang-javascript';
 import { useTheme } from '../contexts/ThemeContext';
+
+interface Position {
+  line: number;
+  ch: number;
+}
+
+interface Selection {
+  from: Position;
+  to: Position;
+}
+
+interface SuccessCondition {
+  cursorPosition?: Position;
+  selections?: Selection[];
+  highlights?: Selection[];
+}
 
 interface CodeWindowProps {
   currentCode: string;
   targetCode: string;
+  successCondition?: SuccessCondition;
   onCodeChange: (code: string) => void;
   onMotionExecuted: (motion: string) => void;
 }
@@ -15,6 +34,7 @@ interface CodeWindowProps {
 export default function CodeWindow({
   currentCode,
   targetCode,
+  successCondition,
   onCodeChange,
   onMotionExecuted
 }: CodeWindowProps) {
@@ -23,6 +43,146 @@ export default function CodeWindow({
   const [vimStatus, setVimStatus] = useState('');
   const [cursorPosition, setCursorPosition] = useState({ line: 0, ch: 0 });
   const editorRef = useRef(null);
+  const targetEditorRef = useRef(null);
+
+  const createTargetDecorations = useCallback((state: EditorState): DecorationSet => {
+    if (!successCondition) return Decoration.none;
+
+    const decorations = [];
+
+    // Create cursor decoration
+    if (successCondition.cursorPosition) {
+      const { line, ch } = successCondition.cursorPosition;
+      try {
+        const lineObj = state.doc.line(line + 1);
+        const pos = Math.min(lineObj.from + ch, lineObj.to);
+
+        const cursorElement = document.createElement('span');
+        cursorElement.className = 'cm-target-cursor';
+        cursorElement.innerHTML = '&nbsp;';
+        cursorElement.style.cssText = `
+          display: inline-block;
+          width: 0px;
+          border-left: 2px solid ${currentTheme.colors.vim.visual};
+          height: 1.2em;
+          animation: blink 1s step-end infinite;
+          pointer-events: none;
+          position: relative;
+          top: 0;
+        `;
+
+        decorations.push(
+          Decoration.widget({
+            widget: cursorElement,
+            side: 0
+          }).range(pos)
+        );
+      } catch (e) {
+        console.warn('Invalid cursor position for target decoration');
+      }
+    }
+
+    // Create selection decorations
+    if (successCondition.selections) {
+      successCondition.selections.forEach(selection => {
+        try {
+          const fromLineObj = state.doc.line(selection.from.line + 1);
+          const toLineObj = state.doc.line(selection.to.line + 1);
+          const fromPos = Math.min(fromLineObj.from + selection.from.ch, fromLineObj.to);
+          const toPos = Math.min(toLineObj.from + selection.to.ch, toLineObj.to);
+
+          decorations.push(
+            Decoration.mark({
+              class: 'cm-target-selection'
+            }).range(fromPos, toPos)
+          );
+        } catch (e) {
+          console.warn('Invalid selection for target decoration');
+        }
+      });
+    }
+
+    // Create highlight decorations
+    if (successCondition.highlights) {
+      successCondition.highlights.forEach(highlight => {
+        try {
+          const fromLineObj = state.doc.line(highlight.from.line + 1);
+          const toLineObj = state.doc.line(highlight.to.line + 1);
+          const fromPos = Math.min(fromLineObj.from + highlight.from.ch, fromLineObj.to);
+          const toPos = Math.min(toLineObj.from + highlight.to.ch, toLineObj.to);
+
+          decorations.push(
+            Decoration.mark({
+              class: 'cm-target-highlight'
+            }).range(fromPos, toPos)
+          );
+        } catch (e) {
+          console.warn('Invalid highlight for target decoration');
+        }
+      });
+    }
+
+    return Decoration.set(decorations);
+  }, [successCondition]);
+
+  const targetExtensions = [
+    javascript(),
+    EditorView.theme({
+      '&': {
+        fontSize: '1.125rem',
+        fontFamily: 'JetBrains Mono, monospace',
+      },
+      '.cm-content': {
+        padding: '16px',
+        backgroundColor: currentTheme.colors.bg.tertiary,
+        color: currentTheme.colors.text.secondary,
+        minHeight: '300px',
+      },
+      '.cm-focused': {
+        outline: 'none',
+      },
+      '.cm-editor': {
+        borderRadius: '0.75rem',
+        border: `2px dashed ${currentTheme.colors.border.secondary}`,
+        backgroundColor: currentTheme.colors.bg.tertiary,
+        opacity: '0.9',
+      },
+      '@keyframes blink': {
+        '0%, 50%': { opacity: '1' },
+        '51%, 100%': { opacity: '0' },
+      },
+      '.cm-target-cursor': {
+        position: 'absolute',
+        borderLeft: `2px solid ${currentTheme.colors.vim.visual}`,
+        height: '1.2em',
+        animation: 'blink 1s step-end infinite',
+      },
+      '.cm-target-selection': {
+        backgroundColor: `${currentTheme.colors.vim.visual}33`,
+        border: `1px solid ${currentTheme.colors.vim.visual}`,
+        borderRadius: '2px',
+      },
+      '.cm-target-highlight': {
+        backgroundColor: `${currentTheme.colors.vim.command}22`,
+        border: `1px solid ${currentTheme.colors.vim.command}`,
+        borderRadius: '2px',
+      },
+      '.cm-cursor': {
+        display: 'none',
+      },
+      '.cm-activeLine': {
+        backgroundColor: 'transparent',
+      },
+      '.cm-selection': {
+        backgroundColor: 'transparent',
+      },
+    }),
+    EditorView.decorations.of((view) => {
+      return createTargetDecorations(view.state);
+    }),
+    EditorState.readOnly.of(true),
+    EditorView.editable.of(false),
+  ];
 
   const extensions = [
     vim({
@@ -105,15 +265,9 @@ export default function CodeWindow({
     onMotionExecuted(`cursor:${cursorPosition.line}:${cursorPosition.ch}`);
   }, [cursorPosition, onMotionExecuted]);
 
-  const renderStaticCode = (code: string) => (
-    <div className="font-mono text-code leading-relaxed text-text-primary bg-bg-secondary rounded-xl min-h-[300px] p-4">
-      {code.split('\n').map((line, index) => (
-        <div key={index} className="min-h-[1.75rem]">
-          {line || '\u00A0'}
-        </div>
-      ))}
-    </div>
-  );
+  const onTargetEditorReady = useCallback((view: EditorView) => {
+    targetEditorRef.current = view;
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col">
@@ -142,8 +296,27 @@ export default function CodeWindow({
         </div>
 
         {/* Target code (read-only) - 40% width */}
-        <div className="w-[40%] bg-bg-secondary rounded-xl border border-border-primary">
-          {renderStaticCode(targetCode)}
+        <div className="w-[40%] relative">
+          <div className="absolute bottom-0 right-2 z-10 bg-bg-primary text-text-secondary text-xs px-2 py-1 rounded border border-border-secondary font-mono">
+            TARGET
+          </div>
+          <CodeMirror
+            value={targetCode}
+            extensions={targetExtensions}
+            onCreateEditor={onTargetEditorReady}
+            basicSetup={{
+              lineNumbers: true,
+              foldGutter: false,
+              dropCursor: false,
+              allowMultipleSelections: false,
+              indentOnInput: false,
+              bracketMatching: false,
+              closeBrackets: false,
+              autocompletion: false,
+              highlightSelectionMatches: false,
+              searchKeymap: false,
+            }}
+          />
         </div>
       </div>
 
