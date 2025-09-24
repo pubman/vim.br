@@ -36,6 +36,16 @@ export type MotionCategory =
   | 'macros'       // Macro recording and execution
   | 'mixed';       // Combination of multiple categories
 
+export interface SuccessCondition {
+  type: 'cursor-position' | 'text-match' | 'text-contains' | 'text-deleted' | 'combined';
+  cursor?: CursorPosition;
+  text?: string;
+  contains?: string[];
+  deleted?: string[];
+  allowPartial?: boolean;
+  description?: string; // Human-readable description of the condition
+}
+
 export interface TaskTemplate {
   title: string;
   description: string;
@@ -45,6 +55,7 @@ export interface TaskTemplate {
   category: MotionCategory;
   focusMotions: string[];
   weight: number; // Probability weight for random selection
+  successConditions: SuccessCondition;
 }
 
 export interface CodeTransformation {

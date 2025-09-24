@@ -5,30 +5,40 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
   // Basic navigation motions: h, j, k, l, w, b, e, 0, $
 
   {
-    title: 'Navigate to end of line',
-    description: 'Practice moving to the end of the current line using $',
+    title: 'Navigate to the exclamation mark in "Trainer!"',
+    description: 'Use $ to jump to the end of the line and position your cursor on the exclamation mark',
     baseCode: `const message = "Welcome to VimMotion Trainer!";`,
     transformations: [],
     difficulty: 'beginner',
     category: 'navigation',
     focusMotions: ['$'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 41 }, // Position of '!' character
+      description: 'Cursor positioned on the exclamation mark at the end of "Trainer!"'
+    }
   },
 
   {
-    title: 'Move to beginning of line',
-    description: 'Practice jumping to the start of the line using 0',
+    title: 'Navigate to the very beginning of the indented line',
+    description: 'Use 0 to jump to column 0, before the indentation spaces',
     baseCode: `    const indentedVariable = "practice with indentation";`,
     transformations: [],
     difficulty: 'beginner',
     category: 'navigation',
     focusMotions: ['0'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 0 }, // Very beginning of line
+      description: 'Cursor positioned at column 0, before the indentation'
+    }
   },
 
   {
-    title: 'Navigate between words',
-    description: 'Use w to move forward by words and b to move backward',
+    title: 'Navigate from "function" to "firstNumber"',
+    description: 'Use w to move forward word by word until you reach "firstNumber" parameter',
     baseCode: `function calculateSum(firstNumber, secondNumber) {
   return firstNumber + secondNumber;
 }`,
@@ -36,12 +46,17 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     difficulty: 'beginner',
     category: 'navigation',
     focusMotions: ['w', 'b'],
-    weight: 1.5
+    weight: 1.5,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 19 }, // Start of "firstNumber"
+      description: 'Cursor positioned at the start of "firstNumber" parameter'
+    }
   },
 
   {
-    title: 'Move to end of word',
-    description: 'Practice using e to jump to the end of words',
+    title: 'Navigate to the end of "userSettings"',
+    description: 'Use e to jump to the last letter "s" in "userSettings"',
     baseCode: `const userSettings = {
   theme: 'dark',
   fontSize: 14,
@@ -51,12 +66,17 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     difficulty: 'beginner',
     category: 'navigation',
     focusMotions: ['e'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 17 }, // End of "userSettings" (last 's')
+      description: 'Cursor positioned at the end of "userSettings" on the final "s"'
+    }
   },
 
   {
-    title: 'Vertical navigation practice',
-    description: 'Use j and k to move up and down lines',
+    title: 'Navigate down to the "cherry" line',
+    description: 'Use j to move down the array until your cursor is on the line containing "cherry"',
     baseCode: `const fruits = [
   'apple',
   'banana',
@@ -68,15 +88,20 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     difficulty: 'beginner',
     category: 'navigation',
     focusMotions: ['j', 'k'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 3, column: 2 }, // Line with 'cherry', positioned at start of string
+      description: 'Cursor positioned on line 4 at the beginning of "cherry"'
+    }
   },
 
   // ===== INTERMEDIATE LEVEL TASKS =====
   // Line navigation, search, first non-blank character
 
   {
-    title: 'Navigate to first non-blank character',
-    description: 'Use ^ to move to the first non-whitespace character',
+    title: 'Navigate to "const" in the indented line',
+    description: 'Use ^ to jump to the first non-whitespace character on the indented line with "const data"',
     baseCode: `function processData() {
     const data = fetchData();
 
@@ -90,34 +115,49 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     difficulty: 'intermediate',
     category: 'navigation',
     focusMotions: ['^'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 1, column: 4 }, // Start of "const" after indentation
+      description: 'Cursor positioned at the start of "const" on the indented line'
+    }
   },
 
   {
-    title: 'Find character in line',
-    description: 'Use f{char} to find the next occurrence of a character',
+    title: 'Find the underscore in "api_key"',
+    description: 'Use f_ to find and navigate to the underscore character in "api_key"',
     baseCode: `const config = { api_key: "abc123", timeout: 5000, retries: 3 };`,
     transformations: [],
     difficulty: 'intermediate',
     category: 'search',
     focusMotions: ['f'],
-    weight: 1.5
+    weight: 1.5,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 20 }, // Position of '_' in "api_key"
+      description: 'Cursor positioned on the underscore in "api_key"'
+    }
   },
 
   {
-    title: 'Find character backwards',
-    description: 'Use F{char} to find the previous occurrence of a character',
+    title: 'Find the first dot in the email regex backwards',
+    description: 'Starting from the end, use F. to find the first dot character backwards in the regex',
     baseCode: `const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;`,
     transformations: [],
     difficulty: 'intermediate',
     category: 'search',
     focusMotions: ['F'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 47 }, // Position of '.' before the escape sequence
+      description: 'Cursor positioned on the dot before the escaped dot sequence'
+    }
   },
 
   {
-    title: 'Move till character',
-    description: 'Use t{char} to move till (before) a character',
+    title: 'Navigate till the opening parenthesis in "formatName("',
+    description: 'Use t( to move till (before) the opening parenthesis in the function call',
     baseCode: `function formatName(firstName, lastName) {
   return firstName + " " + lastName;
 }`,
@@ -125,7 +165,12 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     difficulty: 'intermediate',
     category: 'search',
     focusMotions: ['t', 'T'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 0, column: 17 }, // Position just before '(' in "formatName("
+      description: 'Cursor positioned just before the opening parenthesis in "formatName("'
+    }
   },
 
   {
@@ -176,8 +221,8 @@ class DatabaseManager {
   // Text objects, complex combinations
 
   {
-    title: 'Select word objects',
-    description: 'Practice using iw (inner word) and aw (around word)',
+    title: 'Select the word "trimmedInput" using text objects',
+    description: 'Navigate to "trimmedInput" and use iw to select the inner word',
     baseCode: `function validateInput(userInput) {
   const trimmedInput = userInput.trim();
 
@@ -191,12 +236,18 @@ class DatabaseManager {
     difficulty: 'advanced',
     category: 'text-objects',
     focusMotions: ['iw', 'aw'],
-    weight: 1.5
+    weight: 1.5,
+    successConditions: {
+      type: 'text-contains',
+      contains: ['trimmedInput'],
+      cursor: { line: 1, column: 8 }, // Position within "trimmedInput"
+      description: 'Word "trimmedInput" selected using inner word text object'
+    }
   },
 
   {
-    title: 'Work with string objects',
-    description: 'Use i" and a" to select inside and around quotes',
+    title: 'Select text inside quotes for "Operation completed successfully"',
+    description: 'Navigate to the success message and use i" to select the text inside the quotes',
     baseCode: `const messages = {
   success: "Operation completed successfully",
   error: "An error occurred while processing",
@@ -206,7 +257,13 @@ class DatabaseManager {
     difficulty: 'advanced',
     category: 'text-objects',
     focusMotions: ['i"', 'a"', "i'", "a'"],
-    weight: 1.5
+    weight: 1.5,
+    successConditions: {
+      type: 'text-contains',
+      contains: ['Operation completed successfully'],
+      cursor: { line: 1, column: 12 }, // Position within the quoted text
+      description: 'Text inside quotes "Operation completed successfully" selected'
+    }
   },
 
   {

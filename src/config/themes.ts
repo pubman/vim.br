@@ -24,7 +24,7 @@ export const themes: Theme[] = [
       },
       text: {
         primary: rgb(255, 255, 255),    // Main text
-        secondary: rgb(204, 204, 204),  // Secondary text
+        secondary: rgb(104, 204, 204),  // Secondary text
         tertiary: rgb(153, 153, 153),   // Muted text
         inverse: rgb(51, 51, 51),       // Inverse text (on colored backgrounds)
       },

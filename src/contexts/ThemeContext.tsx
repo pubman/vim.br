@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Theme, ThemeType, ThemeContextValue, DEFAULT_THEME, THEME_STORAGE_KEY } from '../types/Theme';
+import { type ThemeType, type ThemeContextValue, DEFAULT_THEME, THEME_STORAGE_KEY } from '../types/Theme';
 import { themes } from '../config/themes';
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
@@ -30,6 +30,20 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   const currentTheme = themes.find(theme => theme.type === themeType) || themes[0];
 
+  // Apply initial theme immediately on first render to prevent flash
+  React.useLayoutEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const root = document.documentElement;
+    const { colors } = currentTheme;
+
+    // Set variables immediately without waiting for next frame
+    root.style.setProperty('--color-bg-primary', colors.bg.primary);
+    root.style.setProperty('--color-text-primary', colors.text.primary);
+    document.body.style.backgroundColor = colors.bg.primary;
+    document.body.style.color = colors.text.primary;
+  }, []); // Empty dependency to run only once on mount
+
   const setTheme = (newTheme: ThemeType) => {
     setThemeType(newTheme);
     // Persist theme preference
@@ -38,44 +52,50 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   };
 
-  // Apply theme to CSS custom properties
+  // Apply theme to CSS custom properties with improved reliability
   useEffect(() => {
+    // Ensure DOM is ready before manipulating
+    if (typeof document === 'undefined') return;
+
     const root = document.documentElement;
     const { colors } = currentTheme;
 
-    // Background colors
-    root.style.setProperty('--color-bg-primary', colors.bg.primary);
-    root.style.setProperty('--color-bg-secondary', colors.bg.secondary);
-    root.style.setProperty('--color-bg-tertiary', colors.bg.tertiary);
-    root.style.setProperty('--color-bg-quaternary', colors.bg.quaternary);
+    // Use requestAnimationFrame to ensure DOM is ready for immediate updates
+    requestAnimationFrame(() => {
+      // Background colors
+      root.style.setProperty('--color-bg-primary', colors.bg.primary);
+      root.style.setProperty('--color-bg-secondary', colors.bg.secondary);
+      root.style.setProperty('--color-bg-tertiary', colors.bg.tertiary);
+      root.style.setProperty('--color-bg-quaternary', colors.bg.quaternary);
 
-    // Border colors
-    root.style.setProperty('--color-border-primary', colors.border.primary);
-    root.style.setProperty('--color-border-secondary', colors.border.secondary);
-    root.style.setProperty('--color-border-accent', colors.border.accent);
+      // Border colors
+      root.style.setProperty('--color-border-primary', colors.border.primary);
+      root.style.setProperty('--color-border-secondary', colors.border.secondary);
+      root.style.setProperty('--color-border-accent', colors.border.accent);
 
-    // Text colors
-    root.style.setProperty('--color-text-primary', colors.text.primary);
-    root.style.setProperty('--color-text-secondary', colors.text.secondary);
-    root.style.setProperty('--color-text-tertiary', colors.text.tertiary);
-    root.style.setProperty('--color-text-inverse', colors.text.inverse);
+      // Text colors - critical for immediate visibility
+      root.style.setProperty('--color-text-primary', colors.text.primary);
+      root.style.setProperty('--color-text-secondary', colors.text.secondary);
+      root.style.setProperty('--color-text-tertiary', colors.text.tertiary);
+      root.style.setProperty('--color-text-inverse', colors.text.inverse);
 
-    // Vim mode colors
-    root.style.setProperty('--color-vim-normal', colors.vim.normal);
-    root.style.setProperty('--color-vim-insert', colors.vim.insert);
-    root.style.setProperty('--color-vim-visual', colors.vim.visual);
-    root.style.setProperty('--color-vim-command', colors.vim.command);
+      // Vim mode colors
+      root.style.setProperty('--color-vim-normal', colors.vim.normal);
+      root.style.setProperty('--color-vim-insert', colors.vim.insert);
+      root.style.setProperty('--color-vim-visual', colors.vim.visual);
+      root.style.setProperty('--color-vim-command', colors.vim.command);
 
-    // Status colors
-    root.style.setProperty('--color-status-success', colors.status.success);
-    root.style.setProperty('--color-status-error', colors.status.error);
-    root.style.setProperty('--color-status-warning', colors.status.warning);
-    root.style.setProperty('--color-status-info', colors.status.info);
+      // Status colors
+      root.style.setProperty('--color-status-success', colors.status.success);
+      root.style.setProperty('--color-status-error', colors.status.error);
+      root.style.setProperty('--color-status-warning', colors.status.warning);
+      root.style.setProperty('--color-status-info', colors.status.info);
 
-    // Update body classes for theme-specific styling
-    document.body.className = `theme-${themeType}`;
-    document.body.style.backgroundColor = colors.bg.primary;
-    document.body.style.color = colors.text.primary;
+      // Update body classes and styles for theme-specific styling
+      document.body.className = `theme-${themeType}`;
+      document.body.style.backgroundColor = colors.bg.primary;
+      document.body.style.color = colors.text.primary;
+    });
 
   }, [currentTheme, themeType]);
 

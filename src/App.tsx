@@ -127,10 +127,10 @@ function App() {
               <>
                 {/* Task Header */}
                 <div className="bg-bg-secondary rounded-xl p-4 mb-4 border border-border-primary">
-                  <h2 className="text-text-primary font-semibold text-lg mb-2">
+                  <h2 className="text-text-primary font-mono font-semibold text-lg mb-2">
                     {currentTask.title}
                   </h2>
-                  <p className="text-text-secondary text-sm mb-3">
+                  <p className="text-bg-primary text-sm mb-3">
                     {currentTask.description}
                   </p>
                   <div className="flex items-center space-x-4 text-xs">

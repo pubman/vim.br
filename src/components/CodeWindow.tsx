@@ -106,7 +106,7 @@ export default function CodeWindow({
   }, [cursorPosition, onMotionExecuted]);
 
   const renderStaticCode = (code: string) => (
-    <div className="p-4 font-mono text-code leading-relaxed text-text-primary bg-bg-secondary rounded-xl border border-border-primary min-h-[300px]">
+    <div className="font-mono text-code leading-relaxed text-text-primary bg-bg-secondary rounded-xl min-h-[300px] p-4">
       {code.split('\n').map((line, index) => (
         <div key={index} className="min-h-[1.75rem]">
           {line || '\u00A0'}
@@ -118,12 +118,9 @@ export default function CodeWindow({
   return (
     <div className="flex-1 flex flex-col">
       {/* Code display area */}
-      <div className="flex-1 grid grid-cols-2 gap-6 p-6">
-        {/* Interactive code editor */}
-        <div className="bg-bg-secondary rounded-xl p-6 border border-border-primary">
-          <h3 className="text-text-secondary text-sm font-medium mb-4 border-b border-border-primary pb-2">
-            Interactive Code (Vim Mode)
-          </h3>
+      <div className="flex-1 flex gap-6 p-6">
+        {/* Interactive code editor - 60% width */}
+        <div className="w-[60%] bg-bg-secondary rounded-xl border border-border-primary">
           <CodeMirror
             value={currentCode}
             onChange={handleCodeChange}
@@ -144,11 +141,8 @@ export default function CodeWindow({
           />
         </div>
 
-        {/* Target code (read-only) */}
-        <div className="bg-bg-secondary rounded-xl p-6 border border-border-primary">
-          <h3 className="text-text-secondary text-sm font-medium mb-4 border-b border-border-primary pb-2">
-            Target Code
-          </h3>
+        {/* Target code (read-only) - 40% width */}
+        <div className="w-[40%] bg-bg-secondary rounded-xl border border-border-primary">
           {renderStaticCode(targetCode)}
         </div>
       </div>
