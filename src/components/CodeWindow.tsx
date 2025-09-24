@@ -265,14 +265,16 @@ export default function CodeWindow({
     onMotionExecuted(`cursor:${cursorPosition.line}:${cursorPosition.ch}`);
   }, [cursorPosition, onMotionExecuted]);
 
+
   const onTargetEditorReady = useCallback((view: EditorView) => {
     targetEditorRef.current = view;
   }, []);
 
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Code display area */}
-      <div className="flex-1 flex gap-6 p-6">
+      <div className="flex-1 flex gap-0">
         {/* Interactive code editor - 60% width */}
         <div className="w-[60%] bg-bg-secondary rounded-xl border border-border-primary">
           <CodeMirror
@@ -291,6 +293,7 @@ export default function CodeWindow({
               autocompletion: false,
               highlightSelectionMatches: false,
               searchKeymap: false,
+              autoFocus: true,
             }}
           />
         </div>
@@ -305,7 +308,7 @@ export default function CodeWindow({
             extensions={targetExtensions}
             onCreateEditor={onTargetEditorReady}
             basicSetup={{
-              lineNumbers: true,
+              lineNumbers: false,
               foldGutter: false,
               dropCursor: false,
               allowMultipleSelections: false,

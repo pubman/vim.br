@@ -4,7 +4,7 @@ import CodeWindow from './components/CodeWindow'
 import ProfileSidebar from './components/ProfileSidebar'
 import MotionHelper from './components/MotionHelper'
 import { TaskGenerator } from './services/TaskGenerator'
-import { Task, DifficultyLevel } from './types/Task'
+import { type Task, type DifficultyLevel } from './types/Task'
 import { ThemeProvider } from './contexts/ThemeContext'
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
   const [currentTask, setCurrentTask] = useState<Task | null>(null)
   const [taskGenerator] = useState(() => new TaskGenerator())
   const [currentDifficulty, setCurrentDifficulty] = useState<DifficultyLevel>('beginner')
-  const [completedTasks, setCompletedTasks] = useState<string[]>([])
+  const [completedTasks, setCompletedTasks] = useState<string[]>(["1"])
 
   // Generate initial task on app load
   useEffect(() => {
@@ -112,7 +112,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <div className="relative min-h-screen w-full bg-bg-primary mt-[20vh] text-text-primary">
+      <div className="relative min-h-screen w-full bg-bg-primary mt-[15vh] text-text-primary">
         <ProfileSidebar
           isOpen={true}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -120,7 +120,7 @@ function App() {
 
         <div className={`transition-all w-full h--full  flex flex-col items-center justify-center duration-300 ${sidebarOpen ? 'ml-88' : 'ml-0'}`}>
 
-          <div className="flex-col max-w-2xl">
+          <div className="flex-col max-w-3xl">
             <Stats {...stats} />
 
             {currentTask && (
