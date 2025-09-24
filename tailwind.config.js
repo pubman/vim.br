@@ -4,36 +4,65 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Dark theme colors based on the screenshot
+        // Theme-aware colors using CSS custom properties
+        'bg-primary': 'var(--color-bg-primary)',
+        'bg-secondary': 'var(--color-bg-secondary)',
+        'bg-tertiary': 'var(--color-bg-tertiary)',
+        'bg-quaternary': 'var(--color-bg-quaternary)',
+
+        'border-primary': 'var(--color-border-primary)',
+        'border-secondary': 'var(--color-border-secondary)',
+        'border-accent': 'var(--color-border-accent)',
+
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-tertiary': 'var(--color-text-tertiary)',
+        'text-inverse': 'var(--color-text-inverse)',
+
+        // Vim mode colors
+        'vim-normal': 'var(--color-vim-normal)',
+        'vim-insert': 'var(--color-vim-insert)',
+        'vim-visual': 'var(--color-vim-visual)',
+        'vim-command': 'var(--color-vim-command)',
+
+        // Status colors
+        'status-success': 'var(--color-status-success)',
+        'status-error': 'var(--color-status-error)',
+        'status-warning': 'var(--color-status-warning)',
+        'status-info': 'var(--color-status-info)',
+
+        // Legacy support - map old classes to new system
         dark: {
-          900: '#0f0f0f', // Darkest background
-          800: '#1a1a1a', // Main background
-          700: '#2a2a2a', // Card/panel background
-          600: '#3a3a3a', // Border/divider
-          500: '#4a4a4a', // Subtle elements
-          400: '#6a6a6a', // Muted text
-          300: '#8a8a8a', // Secondary text
-          200: '#aaaaaa', // Primary text
-          100: '#cccccc', // Bright text
+          900: 'var(--color-bg-primary)',
+          800: 'var(--color-bg-secondary)',
+          700: 'var(--color-bg-tertiary)',
+          600: 'var(--color-border-primary)',
+          500: 'var(--color-bg-quaternary)',
+          400: 'var(--color-text-tertiary)',
+          300: 'var(--color-text-secondary)',
+          200: 'var(--color-text-secondary)',
+          100: 'var(--color-text-primary)',
         },
-        // Typing accuracy colors
+
+        // Legacy vim colors
+        vim: {
+          normal: 'var(--color-vim-normal)',
+          insert: 'var(--color-vim-insert)',
+          visual: 'var(--color-vim-visual)',
+          command: 'var(--color-vim-command)',
+        },
+
+        // Legacy status colors
         correct: {
-          500: '#22c55e', // Green for correct typing
-          400: '#4ade80',
-          300: '#86efac',
+          500: 'var(--color-status-success)',
+          400: 'var(--color-status-success)',
+          300: 'var(--color-status-success)',
         },
         incorrect: {
-          500: '#ef4444', // Red for incorrect typing
-          400: '#f87171',
-          300: '#fca5a5',
+          500: 'var(--color-status-error)',
+          400: 'var(--color-status-error)',
+          300: 'var(--color-status-error)',
         },
-        // Vim motion themed colors
-        vim: {
-          normal: '#8b5cf6', // Purple for normal mode
-          insert: '#06b6d4', // Cyan for insert mode
-          visual: '#f59e0b', // Orange for visual mode
-          command: '#10b981', // Green for command mode
-        }
       },
       fontFamily: {
         // Monospace fonts for code/typing text

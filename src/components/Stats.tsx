@@ -58,13 +58,13 @@ export default function Stats({
   ];
 
   return (
-    <div className="bg-dark-700 border-b border-dark-600 px-6 py-4 space-y-4">
+    <div className="bg-bg-secondary border-b border-border-primary px-6 py-4 space-y-4">
       {/* Top metrics row */}
       <div className="flex items-center space-x-8">
         {/* Speed */}
         <div className="flex items-baseline space-x-2">
-          <span className="text-dark-300 text-stat font-medium">Speed:</span>
-          <span className="text-dark-100 font-mono text-lg font-semibold">
+          <span className="text-text-secondary text-stat font-medium">Speed:</span>
+          <span className="text-text-primary font-mono text-lg font-semibold">
             {speed.toFixed(1)}mpm
           </span>
           <span className={`text-xs font-mono ${getChangeColor(speedChange)}`}>
@@ -74,8 +74,8 @@ export default function Stats({
 
         {/* Efficiency */}
         <div className="flex items-baseline space-x-2">
-          <span className="text-dark-300 text-stat font-medium">Efficiency:</span>
-          <span className="text-dark-100 font-mono text-lg font-semibold">
+          <span className="text-text-secondary text-stat font-medium">Efficiency:</span>
+          <span className="text-text-primary font-mono text-lg font-semibold">
             {efficiency.toFixed(1)}%
           </span>
           <span className={`text-xs font-mono ${getChangeColor(efficiencyChange)}`}>
@@ -85,8 +85,8 @@ export default function Stats({
 
         {/* Score */}
         <div className="flex items-baseline space-x-2">
-          <span className="text-dark-300 text-stat font-medium">Score:</span>
-          <span className="text-dark-100 font-mono text-lg font-semibold">
+          <span className="text-text-secondary text-stat font-medium">Score:</span>
+          <span className="text-text-primary font-mono text-lg font-semibold">
             {score.toLocaleString()}
           </span>
           <span className={`text-xs font-mono ${getChangeColor(scoreChange)}`}>
@@ -98,7 +98,7 @@ export default function Stats({
       {/* All motions section */}
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
-          <span className="text-dark-300 text-stat font-medium">All motions:</span>
+          <span className="text-text-secondary text-stat font-medium">All motions:</span>
           <div className="flex flex-wrap gap-1">
             {motionCategories.map((category) => (
               <div key={category.name} className="flex gap-1">
@@ -123,30 +123,29 @@ export default function Stats({
       <div className="flex flex-col items-start justify-between">
         {/* Current motion */}
         <div className="flex items-center space-x-2">
-          <span className="text-dark-300 text-stat font-medium">Current motion:</span>
-          <span className="text-dark-200 text-sm">
+          <span className="text-text-secondary text-stat font-medium">Current motion:</span>
+          <span className="text-text-primary text-sm">
             {currentMotionCategory} motions are unlocked.
           </span>
         </div>
 
         {/* Efficiency lessons */}
         <div className="flex items-center space-x-2">
-          <span className="text-dark-300 text-stat font-medium">Efficiency:</span>
-          <span className="text-dark-200 text-sm">
+          <span className="text-text-secondary text-stat font-medium">Efficiency:</span>
+          <span className="text-text-primary text-sm">
             {efficiencyLessons} lessons with {efficiency.toFixed(0)}% efficiency.
           </span>
         </div>
 
         {/* Daily goal */}
         <div className="flex w-full items-center space-x-2">
-          <span className="text-dark-300 text-stat font-medium ov">Daily goal: <span className="text-dark-400 text-xs font-mono">
-            {dailyGoalCurrent}%/{dailyGoalTarget} minutes
+          <span className="text-text-secondary text-stat font-medium">Daily goal: <span className="text-text-tertiary text-xs font-mono">
+            {dailyGoalCurrent}m/{dailyGoalTarget} minutes
           </span></span>
 
-
-          <div className="w-full bg-red-600 rounded-full h-2">
+          <div className="w-full bg-bg-tertiary rounded-full h-2">
             <div
-              className="bg-amber-300 h-2 rounded-full transition-all duration-300"
+              className="bg-status-success h-2 rounded-full transition-all duration-300"
               style={{ width: `${Math.min(dailyGoalProgress, 100)}%` }}
             />
           </div>

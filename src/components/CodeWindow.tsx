@@ -3,6 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { vim, Vim, getCM } from '@replit/codemirror-vim';
 import { EditorView } from '@codemirror/view';
 import { javascript } from '@codemirror/lang-javascript';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CodeWindowProps {
   currentCode: string;
@@ -17,6 +18,7 @@ export default function CodeWindow({
   onCodeChange,
   onMotionExecuted
 }: CodeWindowProps) {
+  const { currentTheme } = useTheme();
   const [vimMode, setVimMode] = useState('normal');
   const [vimStatus, setVimStatus] = useState('');
   const [cursorPosition, setCursorPosition] = useState({ line: 0, ch: 0 });
@@ -45,8 +47,8 @@ export default function CodeWindow({
       },
       '.cm-content': {
         padding: '16px',
-        backgroundColor: '#2a2a2a',
-        color: '#cccccc',
+        backgroundColor: currentTheme.colors.bg.secondary,
+        color: currentTheme.colors.text.primary,
         minHeight: '300px',
       },
       '.cm-focused': {
@@ -54,18 +56,18 @@ export default function CodeWindow({
       },
       '.cm-editor': {
         borderRadius: '0.75rem',
-        border: '1px solid #3a3a3a',
-        backgroundColor: '#2a2a2a',
+        border: `1px solid ${currentTheme.colors.border.primary}`,
+        backgroundColor: currentTheme.colors.bg.secondary,
       },
       '.cm-cursor': {
-        borderLeftColor: '#8b5cf6',
+        borderLeftColor: currentTheme.colors.vim.normal,
         borderLeftWidth: '2px',
       },
       '.cm-activeLine': {
-        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+        backgroundColor: `${currentTheme.colors.vim.normal}1a`,
       },
       '.cm-selection': {
-        backgroundColor: 'rgba(139, 92, 246, 0.3)',
+        backgroundColor: `${currentTheme.colors.vim.normal}4d`,
       },
     }),
   ];
@@ -104,7 +106,7 @@ export default function CodeWindow({
   }, [cursorPosition, onMotionExecuted]);
 
   const renderStaticCode = (code: string) => (
-    <div className="p-4 font-mono text-code leading-relaxed text-dark-200 bg-dark-800 rounded-xl border border-dark-600 min-h-[300px]">
+    <div className="p-4 font-mono text-code leading-relaxed text-text-primary bg-bg-secondary rounded-xl border border-border-primary min-h-[300px]">
       {code.split('\n').map((line, index) => (
         <div key={index} className="min-h-[1.75rem]">
           {line || '\u00A0'}
@@ -118,8 +120,8 @@ export default function CodeWindow({
       {/* Code display area */}
       <div className="flex-1 grid grid-cols-2 gap-6 p-6">
         {/* Interactive code editor */}
-        <div className="bg-dark-700 rounded-xl p-6 border border-dark-600">
-          <h3 className="text-dark-300 text-sm font-medium mb-4 border-b border-dark-600 pb-2">
+        <div className="bg-bg-secondary rounded-xl p-6 border border-border-primary">
+          <h3 className="text-text-secondary text-sm font-medium mb-4 border-b border-border-primary pb-2">
             Interactive Code (Vim Mode)
           </h3>
           <CodeMirror
@@ -143,8 +145,8 @@ export default function CodeWindow({
         </div>
 
         {/* Target code (read-only) */}
-        <div className="bg-dark-700 rounded-xl p-6 border border-dark-600">
-          <h3 className="text-dark-300 text-sm font-medium mb-4 border-b border-dark-600 pb-2">
+        <div className="bg-bg-secondary rounded-xl p-6 border border-border-primary">
+          <h3 className="text-text-secondary text-sm font-medium mb-4 border-b border-border-primary pb-2">
             Target Code
           </h3>
           {renderStaticCode(targetCode)}
@@ -152,81 +154,51 @@ export default function CodeWindow({
       </div>
 
       {/* Vim status bar */}
-      <div className="bg-dark-700 border-t border-dark-600 px-6 py-3">
+      <div className="bg-bg-secondary border-t border-border-primary px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
-              <span className="text-dark-300 text-sm font-medium">Mode:</span>
-              <span className={`text-sm font-mono px-2 py-1 rounded ${
-                vimMode === 'normal' ? 'bg-vim-normal text-white' :
+              <span className="text-text-secondary text-sm font-medium">Mode:</span>
+              <span className={`text-sm font-mono px-2 py-1 rounded ${vimMode === 'normal' ? 'bg-vim-normal text-white' :
                 vimMode === 'insert' ? 'bg-vim-insert text-white' :
-                vimMode === 'visual' ? 'bg-vim-visual text-white' :
-                'bg-dark-600 text-dark-300'
-              }`}>
+                  vimMode === 'visual' ? 'bg-vim-visual text-white' :
+                    'bg-bg-tertiary text-text-secondary'
+                }`}>
                 {vimMode.toUpperCase()}
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-dark-300 text-sm">Position:</span>
-              <span className="text-dark-200 text-sm font-mono">
+              <span className="text-text-secondary text-sm">Position:</span>
+              <span className="text-text-primary text-sm font-mono">
                 {cursorPosition.line + 1}:{cursorPosition.ch + 1}
               </span>
             </div>
             {vimStatus && (
               <div className="flex items-center space-x-2">
-                <span className="text-dark-300 text-sm">Status:</span>
-                <span className="text-dark-200 text-sm font-mono">{vimStatus}</span>
+                <span className="text-text-secondary text-sm">Status:</span>
+                <span className="text-text-primary text-sm font-mono">{vimStatus}</span>
               </div>
             )}
           </div>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => onMotionExecuted('hint')}
-              className="text-vim-command hover:text-green-400 text-sm font-medium transition-colors"
+              className="text-vim-command hover:opacity-80 text-sm font-medium transition-opacity"
             >
               Hint
             </button>
             <button
               onClick={() => onMotionExecuted('skip')}
-              className="text-dark-400 hover:text-dark-300 text-sm font-medium transition-colors"
+              className="text-text-tertiary hover:text-text-secondary text-sm font-medium transition-colors"
             >
               Skip
             </button>
             <button
               onClick={() => onMotionExecuted('new')}
-              className="text-vim-insert hover:text-cyan-400 text-sm font-medium transition-colors"
+              className="text-vim-insert hover:opacity-80 text-sm font-medium transition-opacity"
             >
               New Problem
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick reference */}
-      <div className="bg-dark-800 border-t border-dark-600 px-6 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <span className="text-dark-400 text-sm">Quick Reference:</span>
-            <div className="flex items-center space-x-3">
-              {['hjkl', 'w', 'b', '$', '0', 'gg', 'G', 'f', 'F', 't', 'T'].map((motion) => (
-                <span key={motion} className="text-dark-300 font-mono text-sm bg-dark-700 px-2 py-1 rounded">
-                  {motion}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-dark-400 text-sm">Difficulty:</span>
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4, 5].map((level) => (
-                <div
-                  key={level}
-                  className={`w-3 h-3 rounded-full ${
-                    level <= 2 ? 'bg-vim-normal' : 'bg-dark-600'
-                  }`}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </div>

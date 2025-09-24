@@ -49,9 +49,9 @@ export default function MotionHelper({ currentMotion, suggestions = [] }: Motion
   ];
 
   return (
-    <div className="bg-dark-700 border border-dark-600 rounded-xl p-6 max-w-md">
+    <div className="bg-bg-secondary border border-border-primary rounded-xl p-6 max-w-md">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-dark-100 font-semibold">Motion Helper</h3>
+        <h3 className="text-text-primary font-semibold">Motion Helper</h3>
         <div className="w-3 h-3 bg-vim-command rounded-full animate-pulse-slow"></div>
       </div>
 
@@ -60,7 +60,7 @@ export default function MotionHelper({ currentMotion, suggestions = [] }: Motion
         <div className="mb-6 p-3 bg-vim-normal bg-opacity-20 border border-vim-normal border-opacity-30 rounded-lg">
           <div className="flex items-center space-x-2">
             <span className="text-vim-normal font-mono font-bold">{currentMotion}</span>
-            <span className="text-dark-300 text-sm">Current motion</span>
+            <span className="text-text-secondary text-sm">Current motion</span>
           </div>
         </div>
       )}
@@ -68,7 +68,7 @@ export default function MotionHelper({ currentMotion, suggestions = [] }: Motion
       {/* Suggestions */}
       {suggestions.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-dark-300 text-sm font-medium mb-2">Suggestions</h4>
+          <h4 className="text-text-secondary text-sm font-medium mb-2">Suggestions</h4>
           <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion, index) => (
               <span
@@ -86,17 +86,17 @@ export default function MotionHelper({ currentMotion, suggestions = [] }: Motion
       <div className="space-y-4">
         {motionCategories.map((category, categoryIndex) => (
           <div key={categoryIndex}>
-            <h4 className="text-dark-300 text-sm font-medium mb-2">{category.title}</h4>
+            <h4 className="text-text-secondary text-sm font-medium mb-2">{category.title}</h4>
             <div className="grid grid-cols-1 gap-1">
               {category.motions.map((motion, motionIndex) => (
                 <div
                   key={motionIndex}
-                  className="flex items-center justify-between py-1 px-2 rounded hover:bg-dark-600 transition-colors group"
+                  className="flex items-center justify-between py-1 px-2 rounded hover:bg-bg-tertiary transition-colors group"
                 >
-                  <span className="font-mono text-sm text-dark-100 group-hover:text-vim-normal transition-colors">
+                  <span className="font-mono text-sm text-text-primary group-hover:text-vim-normal transition-colors">
                     {motion.key}
                   </span>
-                  <span className="text-dark-400 text-xs">{motion.desc}</span>
+                  <span className="text-text-tertiary text-xs">{motion.desc}</span>
                 </div>
               ))}
             </div>
@@ -105,12 +105,12 @@ export default function MotionHelper({ currentMotion, suggestions = [] }: Motion
       </div>
 
       {/* Practice mode indicator */}
-      <div className="mt-6 pt-4 border-t border-dark-600">
+      <div className="mt-6 pt-4 border-t border-border-primary">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-dark-400">Practice Mode</span>
+          <span className="text-text-tertiary">Practice Mode</span>
           <div className="flex items-center space-x-1">
-            <div className="w-2 h-2 bg-correct-500 rounded-full"></div>
-            <span className="text-dark-400">Active</span>
+            <div className="w-2 h-2 bg-status-success rounded-full"></div>
+            <span className="text-text-tertiary">Active</span>
           </div>
         </div>
       </div>
