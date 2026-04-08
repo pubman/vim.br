@@ -1,12 +1,12 @@
-import { TaskTemplate } from '../types/Task';
+import { type TaskTemplate } from '../types/Task';
 
 export const TASK_TEMPLATES: TaskTemplate[] = [
   // ===== BEGINNER LEVEL TASKS =====
   // Basic navigation motions: h, j, k, l, w, b, e, 0, $
 
   {
-    title: 'Navigate to the exclamation mark in "Trainer!"',
-    description: 'Use $ to jump to the end of the line and position your cursor on the exclamation mark',
+    title: 'Jump to end of line',
+    description: 'Use $ to jump to the last character on the line (the semicolon)',
     baseCode: `const message = "Welcome to VimMotion Trainer!";`,
     transformations: [],
     difficulty: 'beginner',
@@ -15,8 +15,8 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     weight: 1.0,
     successConditions: {
       type: 'cursor-position',
-      cursor: { line: 0, column: 41 }, // Position of '!' character
-      description: 'Cursor positioned on the exclamation mark at the end of "Trainer!"'
+      cursor: { line: 0, column: 47 }, // ';' is the last char (0-indexed: 47)
+      description: 'Cursor on the last character of the line'
     }
   },
 
@@ -37,8 +37,8 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
   },
 
   {
-    title: 'Navigate from "function" to "firstNumber"',
-    description: 'Use w to move forward word by word until you reach "firstNumber" parameter',
+    title: 'Navigate to "firstNumber" using w',
+    description: 'Use w to move forward word by word until you reach "firstNumber" (press w 3 times from the start)',
     baseCode: `function calculateSum(firstNumber, secondNumber) {
   return firstNumber + secondNumber;
 }`,
@@ -49,8 +49,8 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     weight: 1.5,
     successConditions: {
       type: 'cursor-position',
-      cursor: { line: 0, column: 19 }, // Start of "firstNumber"
-      description: 'Cursor positioned at the start of "firstNumber" parameter'
+      cursor: { line: 0, column: 22 }, // 'firstNumber' starts at col 22 after '('
+      description: 'Cursor at the start of "firstNumber"'
     }
   },
 
@@ -91,8 +91,8 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     weight: 1.0,
     successConditions: {
       type: 'cursor-position',
-      cursor: { line: 3, column: 2 }, // Line with 'cherry', positioned at start of string
-      description: 'Cursor positioned on line 4 at the beginning of "cherry"'
+      cursor: { line: 3, column: 0 }, // Line with 'cherry' — col stays at 0 when pressing j from col 0
+      description: 'Cursor anywhere on the "cherry" line'
     }
   },
 
@@ -140,24 +140,24 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
   },
 
   {
-    title: 'Find the first dot in the email regex backwards',
-    description: 'Starting from the end, use F. to find the first dot character backwards in the regex',
+    title: 'Find the first dot in the email regex',
+    description: 'Use f. to jump to the first dot character in the regex pattern',
     baseCode: `const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;`,
     transformations: [],
     difficulty: 'intermediate',
     category: 'search',
-    focusMotions: ['F'],
+    focusMotions: ['f', 'F'],
     weight: 1.0,
     successConditions: {
       type: 'cursor-position',
-      cursor: { line: 0, column: 47 }, // Position of '.' before the escape sequence
-      description: 'Cursor positioned on the dot before the escaped dot sequence'
+      cursor: { line: 0, column: 33 }, // first '.' is at col 33 inside [a-zA-Z0-9._...]
+      description: 'Cursor on the first dot in the regex character class'
     }
   },
 
   {
     title: 'Navigate till the opening parenthesis in "formatName("',
-    description: 'Use t( to move till (before) the opening parenthesis in the function call',
+    description: 'Use t( to move till (one before) the opening parenthesis in the function call',
     baseCode: `function formatName(firstName, lastName) {
   return firstName + " " + lastName;
 }`,
@@ -168,14 +168,14 @@ export const TASK_TEMPLATES: TaskTemplate[] = [
     weight: 1.0,
     successConditions: {
       type: 'cursor-position',
-      cursor: { line: 0, column: 17 }, // Position just before '(' in "formatName("
-      description: 'Cursor positioned just before the opening parenthesis in "formatName("'
+      cursor: { line: 0, column: 18 }, // 'e' in formatName — one char before '(' at col 19
+      description: 'Cursor one character before the opening parenthesis'
     }
   },
 
   {
     title: 'Jump to beginning and end',
-    description: 'Use gg to go to first line and G to go to last line',
+    description: 'Use gg to go to first line, then G to go to the last line',
     baseCode: `// Header comment
 class DatabaseManager {
   constructor() {
@@ -198,12 +198,17 @@ class DatabaseManager {
     difficulty: 'intermediate',
     category: 'navigation',
     focusMotions: ['gg', 'G'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 17, column: 0 }, // '// End of file' is line index 17 (18th line)
+      description: 'Cursor on the last line after pressing G'
+    }
   },
 
   {
-    title: 'Search for patterns',
-    description: 'Use /pattern to search forward and ?pattern to search backward',
+    title: 'Search for "admin" role',
+    description: 'Use /admin to search forward and land on the first occurrence of "admin"',
     baseCode: `const users = [
   { name: 'Alice', role: 'admin' },
   { name: 'Bob', role: 'user' },
@@ -214,7 +219,12 @@ class DatabaseManager {
     difficulty: 'intermediate',
     category: 'search',
     focusMotions: ['/', '?', 'n', 'N'],
-    weight: 1.0
+    weight: 1.0,
+    successConditions: {
+      type: 'cursor-position',
+      cursor: { line: 1, column: 26 }, // 'admin' starts at col 26 in "  { name: 'Alice', role: 'admin' },"
+      description: "Cursor on 'admin' after searching /admin"
+    }
   },
 
   // ===== ADVANCED LEVEL TASKS =====
@@ -457,6 +467,131 @@ function transposeMatrix(matrix) {
     category: 'visual',
     focusMotions: ['v', 'V'],
     weight: 1.0
+  },
+
+  // ===== EDITING TASKS (with real before/after transformations) =====
+
+  {
+    title: 'Fix the typo: remove the extra "s"',
+    description: 'The word "consst" has a double "s". Position your cursor on the extra "s" and use x to delete it.',
+    baseCode: `consst message = "hello world";`,
+    targetCode: `const message = "hello world";`,
+    transformations: [],
+    difficulty: 'beginner',
+    category: 'editing',
+    focusMotions: ['x'],
+    weight: 1.5,
+    successConditions: {
+      type: 'text-match',
+      description: 'Delete the extra "s" to fix the typo'
+    }
+  },
+
+  {
+    title: 'Fix the version number',
+    description: 'The version is "0" but should be "1". Move to the "0" and use r1 to replace it.',
+    baseCode: `const VERSION = "0.0.0";`,
+    targetCode: `const VERSION = "1.0.0";`,
+    cursorStart: { line: 0, column: 16 },
+    transformations: [],
+    difficulty: 'beginner',
+    category: 'editing',
+    focusMotions: ['r'],
+    weight: 1.5,
+    successConditions: {
+      type: 'text-match',
+      description: 'Replace "0" with "1" using r'
+    }
+  },
+
+  {
+    title: 'Add the missing semicolon',
+    description: 'The array declaration is missing a semicolon at the end. Use A to append to end of line and add ";".',
+    baseCode: `const colors = ['red', 'green', 'blue']`,
+    targetCode: `const colors = ['red', 'green', 'blue'];`,
+    transformations: [],
+    difficulty: 'intermediate',
+    category: 'editing',
+    focusMotions: ['A'],
+    weight: 1.5,
+    successConditions: {
+      type: 'text-match',
+      description: 'Add semicolon at end of line using A'
+    }
+  },
+
+  {
+    title: 'Remove the debug log line',
+    description: 'Delete the console.log("debug") line using dd. Position your cursor on that line first.',
+    baseCode: `function greet(name) {
+  const msg = "Hello, " + name;
+  console.log("debug");
+  return msg;
+}`,
+    targetCode: `function greet(name) {
+  const msg = "Hello, " + name;
+  return msg;
+}`,
+    transformations: [],
+    difficulty: 'intermediate',
+    category: 'editing',
+    focusMotions: ['dd'],
+    weight: 1.5,
+    successConditions: {
+      type: 'text-match',
+      description: 'Delete the debug log line using dd'
+    }
+  },
+
+  {
+    title: 'Add initialization comment',
+    description: 'Open a new line below "function init() {" and type "  // initialized". Use o to open a line below.',
+    baseCode: `function init() {
+}`,
+    targetCode: `function init() {
+  // initialized
+}`,
+    transformations: [],
+    difficulty: 'intermediate',
+    category: 'editing',
+    focusMotions: ['o'],
+    weight: 1.0,
+    successConditions: {
+      type: 'text-match',
+      description: 'Open a line below and add the comment'
+    }
+  },
+
+  {
+    title: 'Clear the string value',
+    description: 'Use ci" to change the content inside the quotes of the greeting string to empty.',
+    baseCode: `const greeting = "Hello, World!";`,
+    targetCode: `const greeting = "";`,
+    transformations: [],
+    difficulty: 'advanced',
+    category: 'editing',
+    focusMotions: ['ci"'],
+    weight: 1.5,
+    successConditions: {
+      type: 'text-match',
+      description: 'Empty the string using ci"'
+    }
+  },
+
+  {
+    title: 'Remove the function call arguments',
+    description: 'Use da( to delete "debugInfo" and the parentheses from the console.log call.',
+    baseCode: `console.log(debugInfo);`,
+    targetCode: `console.log;`,
+    transformations: [],
+    difficulty: 'advanced',
+    category: 'editing',
+    focusMotions: ['da('],
+    weight: 1.0,
+    successConditions: {
+      type: 'text-match',
+      description: 'Delete the argument list using da('
+    }
   }
 ];
 

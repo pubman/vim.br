@@ -1,4 +1,4 @@
-import { Theme } from '../types/Theme';
+import { type Theme } from '../types/Theme';
 
 // Helper function to convert rgb values to CSS rgb string
 const rgb = (r: number, g: number, b: number) => `rgb(${r}, ${g}, ${b})`;

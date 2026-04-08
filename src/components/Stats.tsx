@@ -70,8 +70,8 @@ export default function Stats({
 
   const motionCategories = [
     { name: 'Move', motions: ['h', 'j', 'k', 'l', 'w', 'b', 'e', '0', '^', '$', 'gg', 'G'] },
-    { name: 'Search', motions: ['f', 'F', 't', 'T', '/', '?', 'n', 'N', '*', '#'] },
-    { name: 'Edit', motions: ['i', 'a', 'o', 'O', 's', 'c', 'd', 'y', 'p', 'P', 'x', 'X'] },
+    { name: 'Search', motions: ['f', 'F', 't', 'T', ';', ',', '/', '?', 'n', 'N', '*', '#', '%'] },
+    { name: 'Edit', motions: ['i', 'a', 'o', 'O', 'A', 'I', 's', 'c', 'd', 'y', 'p', 'P', 'x', 'X', 'r', 'R'] },
     { name: 'Text', motions: ['iw', 'aw', 'i"', 'a"', 'i(', 'a(', 'i{', 'a{', 'it', 'at'] },
     { name: 'Visual', motions: ['v', 'V', 'gv'] },
     { name: 'Macro', motions: ['q', '@'] }

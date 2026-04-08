@@ -5,7 +5,6 @@ import {
   type DifficultyLevel,
   type MotionCategory,
   type CursorPosition,
-  MOTION_DEFINITIONS
 } from '../types/Task';
 import { TASK_TEMPLATES } from '../data/taskTemplates';
 
@@ -91,7 +90,7 @@ export class TaskGenerator {
   /**
    * Create a task from a template with variations
    */
-  private createTaskFromTemplate(template: TaskTemplate, options: TaskGenerationOptions): Task {
+  private createTaskFromTemplate(template: TaskTemplate, _options: TaskGenerationOptions): Task {
     const variations = this.generateVariations(template);
     const selectedVariation = variations[Math.floor(Math.random() * variations.length)];
 
@@ -124,11 +123,6 @@ export class TaskGenerator {
     cursorStart: CursorPosition;
     cursorTarget: CursorPosition;
   }[] {
-    // For now, return a single variation
-    // In the future, this could generate multiple random variations
-    const baseCode = template.baseCode;
-
-    // Apply transformations based on template
     const variation = this.applyTransformations(template);
 
     return [variation];
@@ -145,20 +139,13 @@ export class TaskGenerator {
     cursorStart: CursorPosition;
     cursorTarget: CursorPosition;
   } {
-    // This is a simplified implementation
-    // In a full implementation, this would apply the template transformations
-
-    const lines = template.baseCode.split('\n');
-    const randomLine = Math.floor(Math.random() * lines.length);
-    const randomCol = Math.floor(Math.random() * (lines[randomLine]?.length || 0));
-
     return {
       title: template.title,
       input: template.baseCode,
-      target: template.baseCode, // For now, same as input
+      target: template.targetCode ?? template.baseCode,
       optimalMotions: template.focusMotions,
-      cursorStart: { line: 0, column: 0 },
-      cursorTarget: { line: randomLine, column: randomCol }
+      cursorStart: template.cursorStart ?? { line: 0, column: 0 },
+      cursorTarget: template.successConditions?.cursor ?? { line: 0, column: 0 }
     };
   }
 

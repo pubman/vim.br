@@ -50,12 +50,14 @@ export interface TaskTemplate {
   title: string;
   description: string;
   baseCode: string;
+  targetCode?: string;        // If present → editing task; absent → navigation task (cursor-only)
+  cursorStart?: CursorPosition; // Override starting cursor position
   transformations: CodeTransformation[];
   difficulty: DifficultyLevel;
   category: MotionCategory;
   focusMotions: string[];
   weight: number; // Probability weight for random selection
-  successConditions: SuccessCondition;
+  successConditions?: SuccessCondition;
 }
 
 export interface CodeTransformation {

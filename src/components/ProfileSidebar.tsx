@@ -7,7 +7,7 @@ interface ProfileSidebarProps {
   onToggle: () => void;
 }
 
-export default function ProfileSidebar({ isOpen, onToggle }: ProfileSidebarProps) {
+export default function ProfileSidebar({ isOpen, onToggle: _onToggle }: ProfileSidebarProps) {
   const { currentTheme, availableThemes, setTheme } = useTheme();
   const [showThemeSelector, setShowThemeSelector] = useState(false);
 
