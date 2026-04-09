@@ -202,6 +202,9 @@ function App() {
               <CodeWindow
                 currentCode={currentTask.input}
                 targetCode={currentTask.target}
+                cursorStart={currentTask.cursorStart
+                  ? { line: currentTask.cursorStart.line, ch: currentTask.cursorStart.column }
+                  : undefined}
                 successCondition={successCondition}
                 onCodeChange={handleCodeChange}
                 onCursorChange={handleCursorChange}

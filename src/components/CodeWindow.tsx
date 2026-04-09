@@ -27,6 +27,7 @@ interface SuccessCondition {
 interface CodeWindowProps {
   currentCode: string;
   targetCode: string;
+  cursorStart?: { line: number; ch: number };
   successCondition?: SuccessCondition;
   onCodeChange: (code: string) => void;
   onCursorChange?: (cursor: { line: number; ch: number }) => void;
@@ -55,6 +56,7 @@ class CursorWidget extends WidgetType {
 export default function CodeWindow({
   currentCode,
   targetCode,
+  cursorStart,
   successCondition,
   onCodeChange,
   onCursorChange,
@@ -64,6 +66,7 @@ export default function CodeWindow({
   const [vimMode, setVimMode] = useState('normal');
   const [vimStatus, setVimStatus] = useState('');
   const [cursorPosition, setCursorPosition] = useState({ line: 0, ch: 0 });
+  const [splitDir, setSplitDir] = useState<'vertical' | 'horizontal'>('vertical');
 
   // Refs so closures inside CodeMirror extensions always see the latest callbacks
   const onCursorChangeRef = useRef(onCursorChange);
@@ -73,6 +76,29 @@ export default function CodeWindow({
 
   const successConditionRef = useRef(successCondition);
   useEffect(() => { successConditionRef.current = successCondition; }, [successCondition]);
+
+  // View ref — populated in onEditorReady, used to reset cursor on new tasks
+  const viewRef = useRef<EditorView | null>(null);
+
+  // Reset cursor position when a new task loads (currentCode changes).
+  // setTimeout(150) gives @uiw/react-codemirror time to flush its own value-update effect
+  // before we dispatch the cursor, preventing a race where we set the cursor before the
+  // new document is in place and vim resets it.
+  useEffect(() => {
+    if (!cursorStart) return;
+    const timer = setTimeout(() => {
+      const v = viewRef.current;
+      if (!v) return;
+      const doc = v.state.doc;
+      if (cursorStart.line >= doc.lines) return;
+      const lineObj = doc.line(cursorStart.line + 1);
+      const pos = Math.min(lineObj.from + cursorStart.ch, lineObj.to);
+      v.dispatch({ selection: { anchor: pos, head: pos } });
+      v.focus();
+    }, 150);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentCode]); // cursorStart always changes with currentCode — omit it intentionally
 
   const createTargetDecorations = useCallback((state: EditorState): DecorationSet => {
     const sc = successConditionRef.current;
@@ -85,12 +111,20 @@ export default function CodeWindow({
       try {
         const lineObj = state.doc.line(line + 1);
         const pos = Math.min(lineObj.from + ch, lineObj.to);
-        decorations.push(
-          Decoration.widget({
-            widget: new CursorWidget(currentTheme.colors.vim.visual),
-            side: 1
-          }).range(pos)
-        );
+        if (pos < lineObj.to) {
+          // Block-cursor mark over the character at the target position
+          decorations.push(
+            Decoration.mark({ class: 'cm-target-cursor' }).range(pos, pos + 1)
+          );
+        } else {
+          // End of line — fall back to a blinking bar widget
+          decorations.push(
+            Decoration.widget({
+              widget: new CursorWidget(currentTheme.colors.vim.visual),
+              side: 1,
+            }).range(pos)
+          );
+        }
       } catch { /* skip */ }
     }
 
@@ -121,6 +155,11 @@ export default function CodeWindow({
     return Decoration.set(decorations, true);
   }, [currentTheme]);
 
+  // Keep a ref to createTargetDecorations so the stable extensions closure always
+  // calls the latest version (which captures the current theme color).
+  const createTargetDecorationsRef = useRef(createTargetDecorations);
+  useEffect(() => { createTargetDecorationsRef.current = createTargetDecorations; }, [createTargetDecorations]);
+
   // Stable extensions — use refs for callbacks so the closure never goes stale
   const extensions = useRef([
     vim({ status: true }),
@@ -138,6 +177,8 @@ export default function CodeWindow({
         onCursorChangeRef.current?.(cursor);
       }
     }),
+    // Show target cursor position in the current (editable) pane
+    EditorView.decorations.of((view) => createTargetDecorationsRef.current(view.state)),
   ]).current;
 
   // Recreate target extensions when theme changes (they depend on theme colors)
@@ -148,15 +189,19 @@ export default function CodeWindow({
       '&': { fontSize: '1rem', fontFamily: 'JetBrains Mono, monospace' },
       '.cm-content': {
         padding: '12px 16px',
-        backgroundColor: currentTheme.colors.bg.tertiary,
+        backgroundColor: currentTheme.colors.bg.secondary,
         minHeight: '160px',
-        opacity: '0.75',
+        borderLeft: `3px solid ${currentTheme.colors.vim.visual}`,
       },
       '.cm-focused': { outline: 'none' },
       '.cm-editor': {
-        border: `2px dashed ${currentTheme.colors.border.secondary}`,
-        backgroundColor: currentTheme.colors.bg.tertiary,
-        opacity: '0.9',
+        border: `1px solid ${currentTheme.colors.vim.visual}55`,
+        backgroundColor: currentTheme.colors.bg.secondary,
+      },
+      '.cm-gutters': {
+        backgroundColor: currentTheme.colors.bg.primary,
+        borderRight: `1px solid ${currentTheme.colors.vim.visual}33`,
+        color: `${currentTheme.colors.vim.visual}88`,
       },
       '.cm-target-selection': {
         backgroundColor: `${currentTheme.colors.vim.visual}33`,
@@ -189,15 +234,41 @@ export default function CodeWindow({
       border: `1px solid ${currentTheme.colors.border.primary}`,
       backgroundColor: currentTheme.colors.bg.secondary,
     },
+    '.cm-gutters': {
+      backgroundColor: currentTheme.colors.bg.primary,
+      borderRight: `1px solid ${currentTheme.colors.border.primary}`,
+      color: currentTheme.colors.text.tertiary,
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: `${currentTheme.colors.vim.normal}1a`,
+      color: currentTheme.colors.vim.normal,
+    },
     '.cm-cursor': {
       borderLeftColor: currentTheme.colors.vim.normal,
       borderLeftWidth: '2px',
     },
     '.cm-activeLine': { backgroundColor: `${currentTheme.colors.vim.normal}1a` },
     '.cm-selection': { backgroundColor: `${currentTheme.colors.vim.normal}4d` },
+    // Target cursor marker — blinking block in the visual/orange colour
+    '.cm-target-cursor': {
+      backgroundColor: currentTheme.colors.vim.visual,
+      color: currentTheme.colors.bg.primary,
+      borderRadius: '1px',
+      animation: 'vimbr-blink 1s step-end infinite',
+    },
+    // Vim status bar panel at the bottom
+    '.cm-panels': {
+      backgroundColor: currentTheme.colors.bg.primary,
+      borderTop: `1px solid ${currentTheme.colors.border.primary}`,
+      color: currentTheme.colors.text.secondary,
+    },
+    '.cm-panels-bottom': {
+      borderTop: `1px solid ${currentTheme.colors.border.primary}`,
+    },
   });
 
   const onEditorReady = useCallback((view: EditorView) => {
+    viewRef.current = view;
     const cm = getCM(view);
     if (cm) {
       const checkMode = () => {
@@ -213,9 +284,8 @@ export default function CodeWindow({
     }
   }, []);
 
-  return (
-    <div className="flex-1 flex flex-col">
-      {/* Current code editor */}
+  const currentPane = (
+    <div className={splitDir === 'horizontal' ? 'flex-1 min-w-0 flex flex-col' : 'flex flex-col'}>
       <div className="flex items-center px-3 py-1 bg-bg-tertiary border border-border-primary border-b-0 rounded-t-lg">
         <span className="text-text-tertiary text-xs font-mono uppercase tracking-wider">Current</span>
         <div className="ml-auto flex items-center gap-3 text-xs font-mono text-text-tertiary">
@@ -248,26 +318,11 @@ export default function CodeWindow({
           }}
         />
       </div>
+    </div>
+  );
 
-      {/* Divider / action bar */}
-      <div className="flex items-center gap-4 px-3 py-2 bg-bg-secondary border-x border-border-primary">
-        <div className="h-px flex-1 bg-border-primary" />
-        <button
-          onClick={() => onMotionExecuted('hint')}
-          className="text-vim-command hover:opacity-70 text-xs font-mono transition-opacity"
-        >hint</button>
-        <button
-          onClick={() => onMotionExecuted('skip')}
-          className="text-text-tertiary hover:text-text-secondary text-xs font-mono transition-colors"
-        >skip</button>
-        <button
-          onClick={() => onMotionExecuted('new')}
-          className="text-vim-insert hover:opacity-70 text-xs font-mono transition-opacity"
-        >new</button>
-        <div className="h-px flex-1 bg-border-primary" />
-      </div>
-
-      {/* Target code (read-only) */}
+  const targetPane = (
+    <div className={splitDir === 'horizontal' ? 'flex-1 min-w-0 flex flex-col' : 'flex flex-col'}>
       <div className="flex items-center px-3 py-1 bg-bg-tertiary border border-border-primary border-b-0 rounded-t-lg">
         <span className="text-text-tertiary text-xs font-mono uppercase tracking-wider">Target</span>
       </div>
@@ -288,6 +343,46 @@ export default function CodeWindow({
             searchKeymap: false,
           }}
         />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Code panes */}
+      <div className={splitDir === 'horizontal' ? 'flex flex-row gap-3' : 'flex flex-col'}>
+        {currentPane}
+        {splitDir === 'vertical' && (
+          /* Vertical divider between panes — also holds action buttons */
+          <div className="flex items-center gap-4 px-3 py-2 bg-bg-secondary border-x border-border-primary">
+            <div className="h-px flex-1 bg-border-primary" />
+            <button onClick={() => onMotionExecuted('hint')} className="text-vim-command hover:opacity-70 text-xs font-mono transition-opacity">hint</button>
+            <button onClick={() => onMotionExecuted('skip')} className="text-text-tertiary hover:text-text-secondary text-xs font-mono transition-colors">skip</button>
+            <button onClick={() => onMotionExecuted('new')} className="text-vim-insert hover:opacity-70 text-xs font-mono transition-opacity">new</button>
+            <div className="h-px flex-1 bg-border-primary" />
+          </div>
+        )}
+        {targetPane}
+      </div>
+
+      {/* Action bar — always visible below panes */}
+      <div className="flex items-center gap-4 px-3 py-2 bg-bg-secondary border border-border-primary mt-0">
+        <div className="h-px flex-1 bg-border-primary" />
+        {splitDir === 'horizontal' && (
+          <>
+            <button onClick={() => onMotionExecuted('hint')} className="text-vim-command hover:opacity-70 text-xs font-mono transition-opacity">hint</button>
+            <button onClick={() => onMotionExecuted('skip')} className="text-text-tertiary hover:text-text-secondary text-xs font-mono transition-colors">skip</button>
+            <button onClick={() => onMotionExecuted('new')} className="text-vim-insert hover:opacity-70 text-xs font-mono transition-opacity">new</button>
+            <div className="h-px flex-1 bg-border-primary" />
+          </>
+        )}
+        <button
+          onClick={() => setSplitDir(d => d === 'vertical' ? 'horizontal' : 'vertical')}
+          className="text-text-tertiary hover:text-text-secondary text-xs font-mono transition-colors flex items-center gap-1"
+          title="Toggle split direction"
+        >
+          {splitDir === 'vertical' ? '⬛⬛ side by side' : '🟦 stacked'}
+        </button>
       </div>
     </div>
   );
